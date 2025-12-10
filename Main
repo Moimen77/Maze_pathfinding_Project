@@ -1,0 +1,39 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+import numpy as np
+
+# Sample dataset (in a real project, load from a file like CSV)
+data = {
+    'text': [
+        'I love this product!', 'This is amazing.', 'Great job!', 'Awesome experience.',
+        'This sucks.', 'Terrible quality.', 'I hate it.', 'Worst ever.'
+    ],
+    'sentiment': [1, 1, 1, 1, 0, 0, 0, 0]  # 1 = positive, 0 = negative
+}
+df = pd.DataFrame(data)
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(df['text'], df['sentiment'], test_size=0.25, random_state=42)
+
+# Vectorize text
+vectorizer = TfidfVectorizer(max_features=1000)
+X_train_vec = vectorizer.fit_transform(X_train)
+X_test_vec = vectorizer.transform(X_test)
+
+# Train model
+model = LogisticRegression()
+model.fit(X_train_vec, y_train)
+
+# Predict and evaluate
+y_pred = model.predict(X_test_vec)
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Model Accuracy: {accuracy:.2f}")
+
+# Test with new input
+new_text = ["This is fantastic!"]
+new_vec = vectorizer.transform(new_text)
+prediction = model.predict(new_vec)
+print(f"Prediction for '{new_text[0]}': {'Positive' if prediction[0] == 1 else 'Negative'}")
