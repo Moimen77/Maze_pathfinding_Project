@@ -1,56 +1,40 @@
-# ------------------------------------------
-# Depth-First Search (DFS) Algorithm
-# ------------------------------------------
-
 def dfs(maze, start, goal):
-    """
-    DFS algorithm for maze pathfinding.
-    Parameters:
-        maze  : 2D grid (0 = path, 1 = wall)
-        start : (x, y)
-        goal  : (x, y)
-    Returns:
-        path     : final path from start to goal
-        visited  : all visited nodes
-    """
-
     stack = [start]
-    visited = set()
+    visited_set = set()
+    visited_order = []
     parent = {}
 
-    # Directions: Right, Down, Left, Up
-    directions = [(0,1), (1,0), (0,-1), (-1,0)]
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
     while stack:
         current = stack.pop()
 
         if current == goal:
-            return reconstruct_path(parent, start, goal), visited
+            return reconstruct_path(parent, start, goal), visited_order
 
-        if current not in visited:
-            visited.add(current)
+        if current not in visited_set:
+            visited_set.add(current)
+            visited_order.append(current)
+
             x, y = current
-
             for dx, dy in directions:
                 nx, ny = x + dx, y + dy
-
                 if 0 <= nx < len(maze) and 0 <= ny < len(maze[0]):
-                    if maze[nx][ny] == 0 and (nx, ny) not in visited:
+                    if maze[nx][ny] == 0 and (nx, ny) not in visited_set:
                         parent[(nx, ny)] = current
                         stack.append((nx, ny))
 
-    return [], visited
-
+    return [], visited_order
 
 def reconstruct_path(parent, start, goal):
-    """Reconstruct the final DFS path."""
+    """Reconstruct the final DFS path from parent dictionary."""
     path = []
     current = goal
 
     while current != start:
         path.append(current)
         if current not in parent:
-            return []
+            return []  # no path found
         current = parent[current]
 
     path.append(start)

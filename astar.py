@@ -1,59 +1,70 @@
 import heapq
-import time
 
-def manhattan_distance(a, b):
+
+def heuristic(a, b):
+    """Manhattan Distance"""
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
-def astar(maze, start, goal):
-    start_time = time.time()
-    rows = len(maze)
-    cols = len(maze[0])
+
+def a_star(maze, start, goal):
+    """
+    A* algorithm for maze pathfinding.
+
+    Returns:
+        path          : shortest path from start to goal
+        visited_order : nodes visited in order
+    """
+
     open_set = []
     heapq.heappush(open_set, (0, start))
 
     came_from = {}
-    g_cost = {start: 0}
-    visited = []
+
+    g_score = {start: 0}
+    f_score = {start: heuristic(start, goal)}
+
+    visited_order = []
+    visited_set = set()
+
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
     while open_set:
         _, current = heapq.heappop(open_set)
-        visited.append(current)
+
+        if current in visited_set:
+            continue
+
+        visited_set.add(current)
+        visited_order.append(current)
 
         if current == goal:
-            end_time = time.time()
-            return reconstruct_path(came_from, start, goal), visited, g_cost[current], end_time - start_time
+            break
 
-        for n in get_neighbors(current, rows, cols):
-            r, c = n
-            if maze[r][c] == 1:
-                continue
+        for dr, dc in directions:
+            nr, nc = current[0] + dr, current[1] + dc
+            neighbor = (nr, nc)
 
-            new_g = g_cost[current] + 1
+            if (
+                0 <= nr < len(maze)
+                and 0 <= nc < len(maze[0])
+                and maze[nr][nc] == 0
+            ):
+                tentative_g = g_score[current] + 1
 
-            if n not in g_cost or new_g < g_cost[n]:
-                g_cost[n] = new_g
-                f_cost = new_g + manhattan_distance(n, goal)
-                heapq.heappush(open_set, (f_cost, n))
-                came_from[n] = current
+                if neighbor not in g_score or tentative_g < g_score[neighbor]:
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g
+                    f_score[neighbor] = tentative_g + heuristic(neighbor, goal)
+                    heapq.heappush(open_set, (f_score[neighbor], neighbor))
 
-    return None, visited, None, None
-
-def get_neighbors(node, rows, cols):
-    r, c = node
-    dirs = [(1,0), (-1,0), (0,1), (0,-1)]
-    res = []
-    for dr, dc in dirs:
-        nr, nc = r+dr, c+dc
-        if 0 <= nr < rows and 0 <= nc < cols:
-            res.append((nr, nc))
-    return res
-
-def reconstruct_path(came_from, start, goal):
+    # Reconstruct path
     path = []
-    current = goal
-    while current != start:
-        path.append(current)
-        current = came_from[current]
-    path.append(start)
-    path.reverse()
-    return path
+    if goal in came_from or goal == start:
+        cur = goal
+        while cur != start:
+            path.append(cur)
+            cur = came_from[cur]
+        path.append(start)
+        path.reverse()
+
+    return path, visited_order

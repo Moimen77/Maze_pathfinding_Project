@@ -1,12 +1,12 @@
 def load_maze(file_path):
     """
-    Loads a maze from a text file and identifies the start and goal positions.
+    Loads a maze from a text file and identifies start & goal.
 
     Symbols:
-        '#' → Wall
-        '.' → Free cell
-        'S' → Start
-        'G' → Goal
+        # → Wall (1)
+        . → Free (0)
+        S → Start (0)
+        G → Goal (0)
     """
 
     maze = []
@@ -15,16 +15,24 @@ def load_maze(file_path):
 
     with open(file_path, "r") as file:
         for row_index, line in enumerate(file):
-            row = list(line.strip())
-            maze.append(row)
-
-            for col_index, cell in enumerate(row):
-                if cell == "S":
+            row = []
+            for col_index, cell in enumerate(line.strip()):
+                if cell == "#":
+                    row.append(1)
+                elif cell == ".":
+                    row.append(0)
+                elif cell == "S":
                     start = (row_index, col_index)
+                    row.append(0)
                 elif cell == "G":
                     goal = (row_index, col_index)
+                    row.append(0)
+                else:
+                    raise ValueError(f"Invalid character '{cell}' in maze file")
+
+            maze.append(row)
 
     if start is None or goal is None:
-        raise ValueError("Maze must contain 'S' for start and 'G' for goal.")
+        raise ValueError("Maze must contain 'S' (start) and 'G' (goal).")
 
     return maze, start, goal

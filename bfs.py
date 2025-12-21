@@ -1,24 +1,22 @@
 # bfs.py
 from collections import deque
 
+
 def bfs(maze, start, goal):
     """
-    تنفيذ خوارزمية Breadth-First Search لإيجاد أقصر مسار داخل المتاهة.
-    - maze: قائمة ثنائية 2D
-    - start: نقطة البداية (r, c)
-    - goal: نقطة الهدف (r, c)
-    
-    يرجّع:
-        path: المسار النهائي
-        visited: النقاط التي تم زيارتها
+    Breadth-First Search to find the shortest path in a maze.
+
+    Returns:
+        path          : shortest path from start to goal
+        visited_order : nodes visited in order
     """
 
     queue = deque([start])
     visited = set([start])
-    parent = {}
-    dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # up, down, left, right
-
     visited_order = []
+    parent = {}
+
+    dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
     while queue:
         current = queue.popleft()
@@ -27,21 +25,20 @@ def bfs(maze, start, goal):
         if current == goal:
             break
 
-        for d in dirs:
-            nr = current[0] + d[0]
-            nc = current[1] + d[1]
+        for dr, dc in dirs:
+            nr, nc = current[0] + dr, current[1] + dc
 
             if (
                 0 <= nr < len(maze)
                 and 0 <= nc < len(maze[0])
-                and maze[nr][nc] != "#"
+                and maze[nr][nc] == 0
                 and (nr, nc) not in visited
             ):
                 visited.add((nr, nc))
                 parent[(nr, nc)] = current
                 queue.append((nr, nc))
 
-    # إعادة بناء المسار Path
+    # Reconstruct path
     path = []
     if goal in visited:
         cur = goal
